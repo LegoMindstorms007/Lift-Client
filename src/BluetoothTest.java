@@ -20,6 +20,7 @@ public class BluetoothTest {
 	private static final int GO_DOWN = 0;
 	private static final int IS_DOWN = 1;
 	private static final int CLOSE_CONNECTION = 2;
+	private static final int IS_READY = 3;
 	private static DataInputStream dis;
 	private static DataOutputStream dos;
 	private static BTConnection connection;
@@ -31,14 +32,22 @@ public class BluetoothTest {
 	 *            you know what this is for (at least i hope so)
 	 */
 	public static void main(String args[]) {
+		// connect
 		while (!openConnection(LIFT)) {
 			sleep(1000); // waiting for free connection
 		}
 
+		// wait for lift to be ready
+		while (!isReady()) {
+			sleep(100);
+		}
+
+		// move lift down
 		goDown();
 
 		LCD.drawString("Going down", 0, 1);
 
+		// wait for lift to be down
 		while (!canExit()) {
 			LCD.drawString("Can exit: No", 0, 2);
 			sleep(100);
@@ -46,7 +55,17 @@ public class BluetoothTest {
 		}
 		LCD.drawString("Can exit: Yes", 0, 2);
 
+		// close connection
 		closeConnection();
+	}
+
+	/**
+	 * 
+	 * @return whether the lift is ready to be entered or not
+	 */
+	private static boolean isReady() {
+		writeInt(IS_READY);
+		return readBool();
 	}
 
 	/**
